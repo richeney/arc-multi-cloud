@@ -21,6 +21,7 @@ data "azurerm_subscription" "arc" {
 locals {
     // name = var.service_principal_name != "" ? var.service_principal_name : "arc-${data.azurerm_subscription.arc.subscription_id}"
     name = "arc-${data.azurerm_subscription.arc.subscription_id}"
+    ssh_private_key_file = trimsuffix(var.ssh_pub_key_file, ".pub")
 }
 
 resource "azuread_application" "arc" {

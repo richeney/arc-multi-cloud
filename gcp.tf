@@ -5,10 +5,6 @@ provider "google" {
     region      = var.gcp_region
 }
 
-locals {
-    ssh_private_key_file = trimsuffix(var.ssh_pub_key_file, ".pub")
-}
-
 /*
 resource "random_id" "instance_id" {
     // In case you need to append to the VM name

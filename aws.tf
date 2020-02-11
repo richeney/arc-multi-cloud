@@ -9,10 +9,6 @@ provider "template" {
     version = "~> 2.1"
 }
 
-locals {
-    ssh_private_key_file = trimsuffix(var.ssh_pub_key_file, ".pub")
-}
-
 data "template_file" "aws_cloud_init" {
     template = file("cloud-init.tpl")
 
