@@ -1,8 +1,6 @@
 #cloud-config
-package_upgrade: true
-packages:
-- tree
-- jq
+manage_etc_hosts: true
+hostname: ${hostname}
 users:
   - default
   - name: ${myadminuser}
