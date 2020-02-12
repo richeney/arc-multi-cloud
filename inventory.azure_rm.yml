@@ -1,0 +1,13 @@
+plugin: azure_rm
+
+include_vm_resource_groups:
+- azure-arc
+
+auth_source: auto
+
+keyed_groups:
+
+# Generate 'tag_(tag name)_(tag value)' for each tag on a VM.
+- prefix: tag
+  key: tags
+

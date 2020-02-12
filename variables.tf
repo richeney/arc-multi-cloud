@@ -2,6 +2,10 @@ variable "gcp_project" {
     type = string
 }
 
+variable "azure_hostname" {
+    default = "azure-ubuntu-arc"
+}
+
 variable "gcp_hostname" {
     default = "gcp-ubuntu-arc"
 }

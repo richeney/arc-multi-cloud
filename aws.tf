@@ -45,7 +45,7 @@ data "template_file" "aws_ansible" {
     }
 }
 
-resource "local_file" "ansible_aws" {
+resource "local_file" "aws_ansible" {
     sensitive_content       = data.template_file.aws_ansible.rendered
     filename                = "${path.module}/playbooks/aws-ansible-playbook.yml"
     directory_permission    = "0750"
@@ -123,9 +123,15 @@ resource "aws_instance" "aws_ubuntu" {
 
 output "aws_ssh" {
     value       = "ssh ${var.ssh_user}@${aws_instance.aws_ubuntu.public_ip}"
-    description = "The public IP of the web server"
+    description = "SSH command to access the VM"
 }
 
+output "aws_public_ip" {
+    value       = aws_instance.aws_ubuntu.public_ip
+    description = "The public IP of the aws server"
+}
+
+/*
 output "aws_arc" {
 
     value = <<EOF
@@ -141,3 +147,4 @@ EOF
 
     description = "Command to join AWS VM to Azure Arc for control plane management."
 }
+*/

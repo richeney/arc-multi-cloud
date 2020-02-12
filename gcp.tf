@@ -51,7 +51,7 @@ data "template_file" "gcp_ansible" {
         resource_group              = azurerm_resource_group.arc.name
         location                    = var.location
         cloud                       = "gcp"
-        hostname                    = var.aws_hostname
+        hostname                    = var.gcp_hostname
     }
 }
 
@@ -70,7 +70,7 @@ resource "google_compute_instance" "gcp_ubuntu" {
     ]
 
     project       = var.gcp_project
-    name          = "gcp-ubuntu-arc"
+    name          = var.gcp_hostname
     machine_type  = "f1-micro"
     zone          = "${var.gcp_region}-a"
 
@@ -119,4 +119,10 @@ data "google_compute_network" "default" {
 // Output the external ip of the GCP instance
 output "gcp_ssh" {
     value = "ssh ${var.ssh_user}@${google_compute_instance.gcp_ubuntu.network_interface.0.access_config.0.nat_ip}"
+    description = "Command to SSH into the GCP VM"
+}
+
+output "gcp_public_ip" {
+    value = google_compute_instance.gcp_ubuntu.network_interface.0.access_config.0.nat_ip
+    description = "Command to SSH into the GCP VM"
 }
