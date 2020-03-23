@@ -1,46 +1,46 @@
 variable "gcp_project" {
-    type = string
+  type = string
 }
 
 variable "azure_hostname" {
-    default = "azure-ubuntu-arc"
+  default = "azure-ubuntu-arc"
 }
 
 variable "gcp_hostname" {
-    default = "gcp-ubuntu-arc"
+  default = "gcp-ubuntu-arc"
 }
 
 variable "aws_hostname" {
-    default = "aws-ubuntu-arc"
+  default = "aws-ubuntu-arc"
 }
 
 variable "ssh_user" {
-    type = string
+  type = string
 }
 
 // Defaulted variable declarations
 
 variable "ssh_pub_key_file" {
-    default = "~/.ssh/id_rsa.pub"
+  default = "~/.ssh/id_rsa.pub"
 }
 
 variable "gcp_region" {
-    default = "europe-west2" // London
+  default = "europe-west2" // London
 }
 
 variable "gcp_credentials" {
-    default = "~/.gcp/account.json"
+  default = "~/.gcp/account.json"
 }
 
 variable "resource_group" {
-    default = "azure-arc"
+  default = "azure-arc"
 }
 
 variable "service_principal_name" {
-    # Will default to arc-$subscription_id
-    default = ""
+  # Will default to arc-$subscription_id
+  default = ""
 }
 
 variable "location" {
-    default = "West Europe"
+  default = "West Europe"
 }

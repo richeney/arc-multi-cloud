@@ -1,6 +1,6 @@
 locals {
-  auditPasswordlessRemoteConnections    = "/providers/Microsoft.Authorization/policyDefinitions/2d67222d-05fd-4526-a171-2ee132ad9e83"
-  auditRequiredPackages                 = "/providers/Microsoft.Authorization/policyDefinitions/fee5cb2b-9d9b-410e-afe3-2902d90d0004"
+  auditPasswordlessRemoteConnections = "/providers/Microsoft.Authorization/policyDefinitions/2d67222d-05fd-4526-a171-2ee132ad9e83"
+  auditRequiredPackages              = "/providers/Microsoft.Authorization/policyDefinitions/fee5cb2b-9d9b-410e-afe3-2902d90d0004"
 }
 
 data "azurerm_subscription" "current" {}
@@ -8,21 +8,21 @@ data "azurerm_subscription" "current" {}
 data "azurerm_client_config" "current" {}
 
 resource "azurerm_policy_set_definition" "linux" {
-    name         = "LinuxAzureArc"
-    policy_type  = "Custom"
-    display_name = "Linux policies for Azure Arc"
-    description  = "Linux Guest Configuration policies for Hybrid Compute"
+  name         = "LinuxAzureArc"
+  policy_type  = "Custom"
+  display_name = "Linux policies for Azure Arc"
+  description  = "Linux Guest Configuration policies for Hybrid Compute"
 
-    // Requires
-    // management_group_id = data.azurerm_client_config.current.tenant_id
+  // Requires
+  // management_group_id = data.azurerm_client_config.current.tenant_id
 
-    lifecycle {
-        ignore_changes = [
-            metadata
-        ]
-    }
+  lifecycle {
+    ignore_changes = [
+      metadata
+    ]
+  }
 
-/*
+  /*
     parameters = <<PARAMETERS
     {
         "packages": {
@@ -37,7 +37,7 @@ resource "azurerm_policy_set_definition" "linux" {
 PARAMETERS
 */
 
-    policy_definitions = <<POLICY_DEFINITIONS
+  policy_definitions = <<POLICY_DEFINITIONS
     [
         {
             "comment": "Audit servers that allow remote connections with no password.",

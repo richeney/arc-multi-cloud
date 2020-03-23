@@ -1,50 +1,50 @@
 locals {
-    tags = {
-        cloud         = "azure"
-        hostname      = "${var.azure_hostname}"
-        managed_by    = "azure"
-    }
+  tags = {
+    cloud      = "azure"
+    hostname   = "${var.azure_hostname}"
+    managed_by = "azure"
+  }
 }
 
 resource "azurerm_public_ip" "arc" {
-  name                  = "${var.azure_hostname}-pip"
-  location              =  azurerm_resource_group.arc.location
-  resource_group_name   =  azurerm_resource_group.arc.name
-  tags                  =  local.tags
+  name                = "${var.azure_hostname}-pip"
+  location            = azurerm_resource_group.arc.location
+  resource_group_name = azurerm_resource_group.arc.name
+  tags                = local.tags
 
-  allocation_method     = "Static"
-  domain_name_label     =  var.azure_hostname
+  allocation_method = "Static"
+  domain_name_label = var.azure_hostname
 }
 
 resource "azurerm_virtual_network" "arc" {
-  name                  = "arc"
-  location              =  azurerm_resource_group.arc.location
-  resource_group_name   =  azurerm_resource_group.arc.name
-  tags                  =  local.tags
+  name                = "arc"
+  location            = azurerm_resource_group.arc.location
+  resource_group_name = azurerm_resource_group.arc.name
+  tags                = local.tags
 
-  address_space         = [ "10.0.0.0/16"]
+  address_space = ["10.0.0.0/16"]
 }
 
 resource "azurerm_subnet" "arc" {
   name                 = "arc"
-  resource_group_name  =  azurerm_resource_group.arc.name
-  virtual_network_name =  azurerm_virtual_network.arc.name
-  address_prefix       =  "10.0.0.0/24"
+  resource_group_name  = azurerm_resource_group.arc.name
+  virtual_network_name = azurerm_virtual_network.arc.name
+  address_prefix       = "10.0.0.0/24"
 }
 
 resource "azurerm_log_analytics_workspace" "arc" {
   name                = "arc-monitor-logs-workspace"
-  location            =  azurerm_resource_group.arc.location
-  resource_group_name =  azurerm_resource_group.arc.name
-  tags                =  local.tags
+  location            = azurerm_resource_group.arc.location
+  resource_group_name = azurerm_resource_group.arc.name
+  tags                = local.tags
   sku                 = "Free"
 }
 
 resource "azurerm_network_security_group" "arc" {
   name                = "${var.azure_hostname}-nsg"
-  location            =  azurerm_resource_group.arc.location
-  resource_group_name =  azurerm_resource_group.arc.name
-  tags                =  local.tags
+  location            = azurerm_resource_group.arc.location
+  resource_group_name = azurerm_resource_group.arc.name
+  tags                = local.tags
 
   security_rule {
     name                       = "AllowSSH"
@@ -61,27 +61,27 @@ resource "azurerm_network_security_group" "arc" {
 }
 
 resource "azurerm_network_interface" "arc" {
-  name                          = "${var.azure_hostname}-nic"
-  location                      =  azurerm_resource_group.arc.location
-  resource_group_name           =  azurerm_resource_group.arc.name
-  tags                          =  local.tags
-  network_security_group_id     =  azurerm_network_security_group.arc.id
+  name                      = "${var.azure_hostname}-nic"
+  location                  = azurerm_resource_group.arc.location
+  resource_group_name       = azurerm_resource_group.arc.name
+  tags                      = local.tags
+  network_security_group_id = azurerm_network_security_group.arc.id
 
   ip_configuration {
     name                          = "ipconfig1"
-    subnet_id                     =  azurerm_subnet.arc.id
+    subnet_id                     = azurerm_subnet.arc.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          =  azurerm_public_ip.arc.id
+    public_ip_address_id          = azurerm_public_ip.arc.id
   }
 }
 
 resource "azurerm_virtual_machine" "arc" {
-  name                          =  var.azure_hostname
-  location                      =  azurerm_resource_group.arc.location
-  resource_group_name           =  azurerm_resource_group.arc.name
-  tags                          =  local.tags
+  name                          = var.azure_hostname
+  location                      = azurerm_resource_group.arc.location
+  resource_group_name           = azurerm_resource_group.arc.name
+  tags                          = local.tags
   vm_size                       = "Standard_DS1_v2"
-  network_interface_ids         = [ "${azurerm_network_interface.arc.id}" ]
+  network_interface_ids         = ["${azurerm_network_interface.arc.id}"]
   delete_os_disk_on_termination = true
 
   storage_image_reference {
@@ -99,10 +99,10 @@ resource "azurerm_virtual_machine" "arc" {
   }
 
   os_profile {
-    computer_name  =  var.azure_hostname
-    admin_username =  var.ssh_user
+    computer_name  = var.azure_hostname
+    admin_username = var.ssh_user
     // TODO: This custom data line isn't working
-    custom_data    = "sudo apt-get update && sudo apt-get install -yq aptitude tree jq && sudo apt-get dist-upgrade -yq"
+    custom_data = "sudo apt-get update && sudo apt-get install -yq aptitude tree jq && sudo apt-get dist-upgrade -yq"
   }
 
   os_profile_linux_config {
@@ -115,21 +115,21 @@ resource "azurerm_virtual_machine" "arc" {
   }
 
   identity {
-      type = "SystemAssigned"
+    type = "SystemAssigned"
   }
 }
 
 resource "azurerm_virtual_machine_extension" "monitor-agent" {
-  name                          = "${var.azure_hostname}-monitor"
-  location                      =  azurerm_resource_group.arc.location
-  resource_group_name           =  azurerm_resource_group.arc.name
-  tags                          =  local.tags
+  name                = "${var.azure_hostname}-monitor"
+  location            = azurerm_resource_group.arc.location
+  resource_group_name = azurerm_resource_group.arc.name
+  tags                = local.tags
 
-  virtual_machine_name          =  azurerm_virtual_machine.arc.name
-  publisher                     = "Microsoft.EnterpriseCloud.Monitoring"
-  type                          = "OmsAgentForLinux"
-  type_handler_version          = "1.7"
-  auto_upgrade_minor_version    = true
+  virtual_machine_name       = azurerm_virtual_machine.arc.name
+  publisher                  = "Microsoft.EnterpriseCloud.Monitoring"
+  type                       = "OmsAgentForLinux"
+  type_handler_version       = "1.7"
+  auto_upgrade_minor_version = true
 
   settings = <<SETTINGS
         {
@@ -145,9 +145,9 @@ PROTECTED_SETTINGS
 }
 
 output "azure_ssh" {
-    value = "ssh ${var.ssh_user}@${azurerm_public_ip.arc.ip_address}"
+  value = "ssh ${var.ssh_user}@${azurerm_public_ip.arc.ip_address}"
 }
 
 output "azure_public_ip" {
-    value = azurerm_public_ip.arc.ip_address
+  value = azurerm_public_ip.arc.ip_address
 }
