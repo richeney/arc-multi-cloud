@@ -2,7 +2,7 @@ provider "aws" {
   version                 = "~> 2.44"
   region                  = "eu-west-2"
   shared_credentials_file = "~/.aws/credentials"
-  profile                 = "terraform"
+  profile                 = var.aws_profile
 }
 
 provider "template" {
@@ -131,7 +131,6 @@ output "aws_public_ip" {
   description = "The public IP of the aws server"
 }
 
-/*
 output "aws_arc" {
 
     value = <<EOF
@@ -147,4 +146,3 @@ EOF
 
     description = "Command to join AWS VM to Azure Arc for control plane management."
 }
-*/

@@ -1,7 +1,7 @@
 locals {
   tags = {
     cloud      = "azure"
-    hostname   = "${var.azure_hostname}"
+    hostname   = var.azure_hostname
     managed_by = "azure"
   }
 }
@@ -81,7 +81,7 @@ resource "azurerm_virtual_machine" "arc" {
   resource_group_name           = azurerm_resource_group.arc.name
   tags                          = local.tags
   vm_size                       = "Standard_DS1_v2"
-  network_interface_ids         = ["${azurerm_network_interface.arc.id}"]
+  network_interface_ids         = [azurerm_network_interface.arc.id]
   delete_os_disk_on_termination = true
 
   storage_image_reference {

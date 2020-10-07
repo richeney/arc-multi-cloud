@@ -10,6 +10,10 @@ variable "gcp_hostname" {
   default = "gcp-ubuntu-arc"
 }
 
+variable "aws_profile" {
+  default = "terraform"
+}
+
 variable "aws_hostname" {
   default = "aws-ubuntu-arc"
 }

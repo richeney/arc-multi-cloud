@@ -1,2 +1,2 @@
 ssh_user    = "richeney"
-gcp_project = "azure-arc-260215"
+gcp_project = "azure-arc-richeney"
