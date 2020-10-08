@@ -1,6 +1,6 @@
 locals {
-  auditPasswordlessRemoteConnections = "/providers/Microsoft.Authorization/policyDefinitions/2d67222d-05fd-4526-a171-2ee132ad9e83"
-  auditRequiredPackages              = "/providers/Microsoft.Authorization/policyDefinitions/fee5cb2b-9d9b-410e-afe3-2902d90d0004"
+  auditBadPasswdFilePermissions = "/providers/Microsoft.Authorization/policyDefinitions/e6955644-301c-44b5-a4c4-528577de6861"
+  auditRequiredPackages         = "/providers/Microsoft.Authorization/policyDefinitions/d3b823c9-e0fc-4453-9fb2-8213b7338523"
 }
 
 data "azurerm_subscription" "current" {}
@@ -13,39 +13,43 @@ resource "azurerm_policy_set_definition" "linux" {
   display_name = "Linux policies for Azure Arc"
   description  = "Linux Guest Configuration policies for Hybrid Compute"
 
-  // Requires
-  // management_group_id = data.azurerm_client_config.current.tenant_id
-
-  lifecycle {
-    ignore_changes = [
-      metadata
-    ]
-  }
-
-  /*
-    parameters = <<PARAMETERS
+  metadata = <<METADATA
     {
-        "packages": {
-            "type": "Array",
+      "category": "Azure Arc"
+    }
+METADATA
+
+  parameters = <<PARAMETERS
+    {
+        "Packages": {
+            "type": "String",
+            "defaultValue": "",
             "metadata": {
                 "displayName": "List of required packages",
-                "description": "List of software packages required on Linux."
-            },
-            "defaultValue": []
+                "description": "Semicolon separate list of software packages required on Linux."
+            }
         }
     }
 PARAMETERS
-*/
 
-  policy_definitions = <<POLICY_DEFINITIONS
-    [
-        {
-            "comment": "Audit servers that allow remote connections with no password.",
-            "policyDefinitionId": "${local.auditPasswordlessRemoteConnections}"
-        }
-    ]
-POLICY_DEFINITIONS
+  policy_definition_reference {
+    policy_definition_id = local.auditBadPasswdFilePermissions
+    parameter_values     = <<VALUE
+    {
+      "IncludeArcMachines": {"value": "true"}
+    }
+VALUE
+  }
 
+  policy_definition_reference {
+    policy_definition_id = local.auditRequiredPackages
+    parameter_values     = <<VALUE
+    {
+      "IncludeArcMachines": {"value": "true"},
+      "ApplicationName": {"value": "[parameters('Packages')]"}
+    }
+VALUE
+  }
 }
 
 resource "azurerm_policy_assignment" "linux" {
@@ -54,4 +58,22 @@ resource "azurerm_policy_assignment" "linux" {
   policy_definition_id = azurerm_policy_set_definition.linux.id
   description          = "Linux Policies for Azure Arc"
   display_name         = "Audit policy initiative assignment for Linux Azure Arc VMs."
+
+  lifecycle {
+    ignore_changes = [
+      parameters
+    ]
+  }
+
+  metadata = <<METADATA
+    {
+      "category": "Azure Arc"
+    }
+    METADATA
+
+  parameters = <<PARAMETERS
+    {
+      "Packages": { "value": "jq; aptitude" }
+    }
+    PARAMETERS
 }

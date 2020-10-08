@@ -1,17 +1,18 @@
 provider "azurerm" {
-  version = "=1.40.0"
+  version = "~> 2.30.0"
+  features {}
 }
 
 provider "azuread" {
-  version = "=0.7.0"
+  version = "~> 1.0.0"
 }
 
 provider "random" {
-  version = "=2.2.1"
+  version = "~> 2.3.0"
 }
 
 provider "local" {
-  version = "= 1.4"
+  version = "~> 1.4.0"
 }
 
 data "azurerm_subscription" "arc" {

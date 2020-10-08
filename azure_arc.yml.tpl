@@ -21,6 +21,12 @@
       dest: /tmp/packages-microsoft-prod.deb
       mode: '0444'
     when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '18.04'
+  - name: Download the 20.04 packages file
+    get_url:
+      url: https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
+      dest: /tmp/packages-microsoft-prod.deb
+      mode: '0444'
+    when: ansible_distribution == 'Ubuntu' and ansible_distribution_version == '20.04'
   - name: Install the .deb package
     apt:
       deb: /tmp/packages-microsoft-prod.deb

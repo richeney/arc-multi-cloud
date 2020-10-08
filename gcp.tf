@@ -1,5 +1,5 @@
 provider "google" {
-  version     = "~> 3.4"
+  version     = "~> 3.42.0"
   credentials = file(var.gcp_credentials)
   project     = var.gcp_project
   region      = var.gcp_region

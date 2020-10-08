@@ -1,5 +1,5 @@
 provider "aws" {
-  version                 = "~> 2.44"
+  version                 = "~> 2.70.0"
   region                  = "eu-west-2"
   shared_credentials_file = "~/.aws/credentials"
   profile                 = var.aws_profile
@@ -129,20 +129,4 @@ output "aws_ssh" {
 output "aws_public_ip" {
   value       = aws_instance.aws_ubuntu.public_ip
   description = "The public IP of the aws server"
-}
-
-output "aws_arc" {
-
-    value = <<EOF
-/usr/bin/azcmagent connect \
---tenant-id ${data.azurerm_subscription.arc.tenant_id} \
---service-principal-id ${azuread_service_principal.arc.application_id} \
---service-principal-secret "${random_password.arc.result}" \
---subscription-id ${data.azurerm_subscription.arc.subscription_id} \
---resource-group "${azurerm_resource_group.arc.name}" \
---location "${var.location}" \
---tags \"cloud=aws,hostname=${var.aws_hostname},managed_by=arc\"
-EOF
-
-    description = "Command to join AWS VM to Azure Arc for control plane management."
 }

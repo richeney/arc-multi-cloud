@@ -1,5 +1,6 @@
+.vscode/*
 .terraform/*
+.terraform.tfstate.lock.info
 terraform.tfstate*
 playbooks/*
 hosts
-old/*
