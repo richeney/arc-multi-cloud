@@ -1,29 +1,18 @@
-provider "google" {
-  version     = "~> 3.42.0"
-  credentials = file(var.gcp_credentials)
-  project     = var.gcp_project
-  region      = var.gcp_region
+locals {
+  ssh_private_key_file = trimsuffix(var.ssh_pub_key_file, ".pub")
 }
-
-/*
-resource "random_id" "instance_id" {
-    // In case you need to append to the VM name
-    byte_length = 8
-}
-*/
 
 resource "google_compute_project_metadata_item" "ssh-keys" {
-  project = var.gcp_project
-  key     = "ssh-keys"
-  value   = "${var.ssh_user}:${file(var.ssh_pub_key_file)}"
+  key   = "${var.hostname}-ssh-keys"
+  value = "${var.ssh_user}:${file(var.ssh_pub_key_file)}"
 
 }
 
 data "template_file" "gcp_cloud_init" {
-  template = file("cloud-init.tpl")
+  template = file("${path.root}/templates/cloud-init.tpl")
 
   vars = {
-    hostname    = var.gcp_hostname
+    hostname    = var.hostname
     myadminuser = var.ssh_user
     mysshkey    = file(var.ssh_pub_key_file)
   }
@@ -31,33 +20,29 @@ data "template_file" "gcp_cloud_init" {
 
 resource "local_file" "cloud_init_gcp" {
   sensitive_content    = data.template_file.gcp_cloud_init.rendered
-  filename             = "${path.module}/playbooks/gcp-cloud-init"
+  filename             = "${path.root}/playbooks/${var.hostname}-cloud-init"
   directory_permission = "0750"
   file_permission      = "0640"
 }
 
 data "template_file" "gcp_ansible" {
-  depends_on = [
-    azuread_service_principal_password.arc,
-  ]
-
-  template = file("azure_arc.yml.tpl")
+  template = file("${path.root}/templates/azure_arc.yml.tpl")
 
   vars = {
-    tenant_id                = data.azurerm_subscription.arc.tenant_id
-    subscription_id          = data.azurerm_subscription.arc.subscription_id
-    service_principal_appid  = azuread_service_principal.arc.application_id
-    service_principal_secret = random_password.arc.result
-    resource_group           = azurerm_resource_group.arc.name
-    location                 = var.location
+    tenant_id                = var.arc.tenant_id
+    subscription_id          = var.arc.subscription_id
+    service_principal_appid  = var.arc.service_principal_appid
+    service_principal_secret = var.arc.service_principal_secret
+    resource_group_name      = var.arc.resource_group_name
+    location                 = var.arc.location
     cloud                    = "gcp"
-    hostname                 = var.gcp_hostname
+    hostname                 = var.hostname
   }
 }
 
 resource "local_file" "gcp_ansible" {
   sensitive_content    = data.template_file.gcp_ansible.rendered
-  filename             = "${path.module}/playbooks/gcp-ansible-playbook.yml"
+  filename             = "${path.root}/playbooks/${var.hostname}-playbook.yml"
   directory_permission = "0750"
   file_permission      = "0640"
 }
@@ -69,10 +54,8 @@ resource "google_compute_instance" "gcp_ubuntu" {
     data.template_file.gcp_ansible,
   ]
 
-  project      = var.gcp_project
-  name         = var.gcp_hostname
+  name         = var.hostname
   machine_type = "f1-micro"
-  zone         = "${var.gcp_region}-a"
 
   boot_disk {
     initialize_params {
@@ -107,22 +90,10 @@ resource "google_compute_instance" "gcp_ubuntu" {
   provisioner "local-exec" {
     // command = "ansible-playbook -i '${google_compute_instance.tfansible.network_interface.0.access_config.0.assigned_nat_ip},' --private-key ${var.private_key_path} data.template_file.ansible_aws.rendered"
     // Ansible inventory list needs the trailing comma
-    command = "ansible-playbook -i '${self.network_interface.0.access_config.0.nat_ip},' --user=${var.ssh_user} --private-key ${local.ssh_private_key_file} ${path.module}/playbooks/gcp-ansible-playbook.yml --verbose"
+    command = "ansible-playbook -i '${self.network_interface.0.access_config.0.nat_ip},' --user=${var.ssh_user} --private-key ${local.ssh_private_key_file} ${path.root}/playbooks/${var.hostname}-playbook.yml --verbose"
   }
 }
 
 data "google_compute_network" "default" {
   name = "default"
-}
-
-
-// Output the external ip of the GCP instance
-output "gcp_ssh" {
-  value       = "ssh ${var.ssh_user}@${google_compute_instance.gcp_ubuntu.network_interface.0.access_config.0.nat_ip}"
-  description = "Command to SSH into the GCP VM"
-}
-
-output "gcp_public_ip" {
-  value       = google_compute_instance.gcp_ubuntu.network_interface.0.access_config.0.nat_ip
-  description = "Command to SSH into the GCP VM"
 }

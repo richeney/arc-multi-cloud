@@ -157,7 +157,7 @@ The var.gcp_credentials default value is `~/.gcp/account.json`.
 * <https://cloud.google.com/sdk/docs/quickstart-debian-ubuntu>
 * <https://www.terraform.io/docs/providers/google/guides/getting_started.html>
 * <https://cloud.google.com/community/tutorials/getting-started-on-gcp-with-terraform>
-* <https://console.cloud.google.com/>
+* <https://console.cloud.google.com/> - ends 26 Nov 2020
 
 ### AWS
 

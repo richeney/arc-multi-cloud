@@ -64,7 +64,7 @@
         - --subscription-id
         - ${subscription_id}
         - --resource-group
-        - ${resource_group}
+        - ${resource_group_name}
         - --location
         - ${location}
         - --tags

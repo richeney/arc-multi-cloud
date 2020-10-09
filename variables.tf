@@ -1,48 +1,38 @@
-variable "gcp_project" {
-  type = string
+variable "aws_hostnames" {
+  type        = list(string)
+  default     = []
+  description = "List of AWS hostnames to create and onboard."
 }
 
+variable "gcp_hostnames" {
+  type        = list(string)
+  default     = []
+  description = "List of GCP hostnames to create and onboard."
+}
+
+/*
 variable "azure_hostname" {
   default = "azure-ubuntu-arc"
 }
-
-variable "gcp_hostname" {
-  default = "gcp-ubuntu-arc"
-}
-
-variable "aws_profile" {
-  default = "terraform"
-}
-
-variable "aws_hostname" {
-  default = "aws-ubuntu-arc"
-}
-
-variable "ssh_user" {
-  type = string
-}
+*/
 
 // Defaulted variable declarations
+
+variable "ssh_user" {
+  type    = string
+  default = "ubuntu"
+}
 
 variable "ssh_pub_key_file" {
   default = "~/.ssh/id_rsa.pub"
 }
 
-variable "gcp_region" {
-  default = "europe-west2" // London
-}
-
-variable "gcp_credentials" {
-  default = "~/.gcp/account.json"
-}
-
-variable "resource_group" {
+variable "resource_group_name" {
   default = "azure-arc"
 }
 
 variable "service_principal_name" {
-  # Will default to arc-$subscription_id
-  default = ""
+  default = "" # Will default to arc-$subscription_id
 }
 
 variable "location" {

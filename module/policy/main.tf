@@ -3,23 +3,20 @@ locals {
   auditRequiredPackages         = "/providers/Microsoft.Authorization/policyDefinitions/d3b823c9-e0fc-4453-9fb2-8213b7338523"
 }
 
-data "azurerm_subscription" "current" {}
-
-data "azurerm_client_config" "current" {}
-
 resource "azurerm_policy_set_definition" "linux" {
-  name         = "LinuxAzureArc"
-  policy_type  = "Custom"
-  display_name = "Linux policies for Azure Arc"
-  description  = "Linux Guest Configuration policies for Hybrid Compute"
+  name                  = "LinuxAzureArc"
+  policy_type           = "Custom"
+  display_name          = "Linux policies for Azure Arc"
+  description           = "Linux Guest Configuration policies for Hybrid Compute"
+  management_group_name = var.management_group_name
 
-  metadata = <<METADATA
+  metadata = <<-METADATA
     {
       "category": "Azure Arc"
     }
-METADATA
+    METADATA
 
-  parameters = <<PARAMETERS
+  parameters = <<-PARAMETERS
     {
         "Packages": {
             "type": "String",
@@ -30,34 +27,34 @@ METADATA
             }
         }
     }
-PARAMETERS
+    PARAMETERS
 
   policy_definition_reference {
     policy_definition_id = local.auditBadPasswdFilePermissions
-    parameter_values     = <<VALUE
+    parameter_values     = <<-VALUE
     {
       "IncludeArcMachines": {"value": "true"}
     }
-VALUE
+    VALUE
   }
 
   policy_definition_reference {
     policy_definition_id = local.auditRequiredPackages
-    parameter_values     = <<VALUE
+    parameter_values     = <<-VALUE
     {
       "IncludeArcMachines": {"value": "true"},
       "ApplicationName": {"value": "[parameters('Packages')]"}
     }
-VALUE
+    VALUE
   }
 }
 
 resource "azurerm_policy_assignment" "linux" {
   name                 = "LinuxAzureArc"
-  scope                = azurerm_resource_group.arc.id
+  scope                = var.assignment_scope
   policy_definition_id = azurerm_policy_set_definition.linux.id
-  description          = "Linux Policies for Azure Arc"
-  display_name         = "Audit policy initiative assignment for Linux Azure Arc VMs."
+  description          = "Custom Guest Configuration policy initiative for Linux Azure Arc VMs."
+  display_name         = "Custom Guest Configuration (Linux Arc)"
 
   lifecycle {
     ignore_changes = [
@@ -65,15 +62,17 @@ resource "azurerm_policy_assignment" "linux" {
     ]
   }
 
-  metadata = <<METADATA
+  metadata = <<-METADATA
     {
       "category": "Azure Arc"
     }
     METADATA
 
-  parameters = <<PARAMETERS
+  parameters = <<-PARAMETERS
     {
-      "Packages": { "value": "jq; aptitude" }
+      "Packages": {
+        "value": "${join(";", var.packages)}"
+      }
     }
     PARAMETERS
 }
